@@ -7,6 +7,8 @@ import (
 	"route-graph-service/internal/repo"
 	pb "route-graph-service/proto/routegraph"
 	helper "route-graph-service/util"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 type Server struct {
@@ -385,4 +387,80 @@ func (s *Server) DepotsIdleStats(ctx context.Context, req *pb.DepotsRequest) (*p
 		})
 	}
 	return out, nil
+}
+
+/*Reports*/
+type Vehicle = repo.Vehicle
+type Stop = repo.Stop
+
+// Funkcija za generisanje PDF-a
+func (s *Server) GeneratePDFReport(ctx context.Context, filename string) error {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.SetTitle("Izveštaj iz baze", false)
+	pdf.AddPage()
+
+	vehiclesByDepot, _ := s.repo.GetVehiclesByDepot()
+	stopsByZone, _ := s.repo.GetStopsByZone()
+	occupancy, _ := s.repo.GetAverageOccupancyByDepot()
+	shortestPath, hops, _ := s.repo.ShortestPath(ctx, "S1", "S10", 10)
+
+	for depot, vehicles := range vehiclesByDepot {
+		pdf.SetFont("Arial", "B", 14)
+		pdf.Cell(0, 8, fmt.Sprintf("Depot: %s", depot))
+		pdf.Ln(10)
+		addVehiclesTable(pdf, vehicles)
+	}
+
+	for zone, stops := range stopsByZone {
+		pdf.SetFont("Arial", "B", 14)
+		pdf.Cell(0, 8, fmt.Sprintf("Zona: %s", zone))
+		pdf.Ln(10)
+		addStopsTable(pdf, stops)
+	}
+
+	addOccupancyCharts(pdf, occupancy)
+	addShortestPath(pdf, shortestPath, hops)
+
+	return pdf.OutputFileAndClose(filename)
+}
+
+func addVehiclesTable(pdf *gofpdf.Fpdf, vehicles []Vehicle) {
+	pdf.SetFont("Arial", "", 12)
+	for _, v := range vehicles {
+		pdf.Cell(0, 6, fmt.Sprintf("Vehicle: %s | Status: %s | Capacity: %d", v.UUID, v.Status, v.Capacity))
+		pdf.Ln(6)
+	}
+	pdf.Ln(4)
+}
+
+func addStopsTable(pdf *gofpdf.Fpdf, stops []Stop) {
+	pdf.SetFont("Arial", "", 12)
+	for _, s := range stops {
+		pdf.Cell(0, 6, fmt.Sprintf("Stop: %s | Name: %s | Shelter: %v", s.ID, s.Name, s.Shelter))
+		pdf.Ln(6)
+	}
+	pdf.Ln(4)
+}
+
+func addOccupancyCharts(pdf *gofpdf.Fpdf, occupancy map[string]float64) {
+	pdf.SetFont("Arial", "B", 14)
+	pdf.Cell(0, 8, "Average Occupancy by Depot")
+	pdf.Ln(10)
+	for depot, avg := range occupancy {
+		pdf.Cell(0, 6, fmt.Sprintf("%s: %.2f", depot, avg))
+		pdf.Ln(6)
+	}
+	pdf.Ln(4)
+}
+
+func addShortestPath(pdf *gofpdf.Fpdf, path []string, hops int) {
+	pdf.SetFont("Arial", "B", 14)
+	pdf.Cell(0, 8, fmt.Sprintf("Shortest Path (hops: %d)", hops))
+	pdf.Ln(10)
+	pdf.SetFont("Arial", "", 12)
+	for _, stop := range path {
+		pdf.Cell(0, 6, stop)
+		pdf.Ln(6)
+	}
+	pdf.Ln(4)
 }

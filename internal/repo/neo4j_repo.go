@@ -704,3 +704,99 @@ func (r *NeoRepo) ShortestPath(ctx context.Context, start, end string, maxHops i
 	m := out.(map[string]any)
 	return m["ids"].([]string), m["hops"].(int), nil
 }
+
+/* Methods for generating report*/
+type Vehicle struct {
+	UUID     string
+	Status   string
+	Capacity int
+	Depot    string
+}
+
+type Stop struct {
+	ID      string
+	Name    string
+	Zone    string
+	Shelter bool
+}
+
+func (r *NeoRepo) GetVehiclesByDepot() (map[string][]Vehicle, error) {
+	ctx := context.Background()
+	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	result := make(map[string][]Vehicle)
+	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `MATCH (v:Vehicle)-[:PARKED_AT]->(d:Depot) RETURN v.vehicle_uuid, v.status, v.capacity, d.name`
+		rs, err := tx.Run(ctx, query, nil)
+		if err != nil {
+			return nil, err
+		}
+		for rs.Next(ctx) {
+			rec := rs.Record()
+			depot := rec.Values[3].(string)
+			v := Vehicle{
+				UUID:     rec.Values[0].(string),
+				Status:   rec.Values[1].(string),
+				Capacity: int(rec.Values[2].(int64)),
+				Depot:    depot,
+			}
+			result[depot] = append(result[depot], v)
+		}
+		return nil, nil
+	})
+	return result, err
+}
+
+func (r *NeoRepo) GetStopsByZone() (map[string][]Stop, error) {
+	ctx := context.Background()
+	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	result := make(map[string][]Stop)
+	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `MATCH (s:Stop) RETURN s.id, s.name, s.zone, s.shelter`
+		rs, err := tx.Run(ctx, query, nil)
+		if err != nil {
+			return nil, err
+		}
+		for rs.Next(ctx) {
+			rec := rs.Record()
+			s := Stop{
+				ID:      rec.Values[0].(string),
+				Name:    rec.Values[1].(string),
+				Zone:    rec.Values[2].(string),
+				Shelter: rec.Values[3].(bool),
+			}
+			result[s.Zone] = append(result[s.Zone], s)
+		}
+		return nil, nil
+	})
+	return result, err
+}
+
+func (r *NeoRepo) GetAverageOccupancyByDepot() (map[string]float64, error) {
+	ctx := context.Background()
+	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	result := make(map[string]float64)
+	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		query := `
+			MATCH (v:Vehicle)-[:PARKED_AT]->(d:Depot)
+			RETURN d.name, avg(v.capacity * CASE WHEN v.status='ACTIVE' THEN 1 ELSE 0 END) as avgOccupied
+		`
+		rs, err := tx.Run(ctx, query, nil)
+		if err != nil {
+			return nil, err
+		}
+		for rs.Next(ctx) {
+			rec := rs.Record()
+			depot := rec.Values[0].(string)
+			avg := rec.Values[1].(float64)
+			result[depot] = avg
+		}
+		return nil, nil
+	})
+	return result, err
+}

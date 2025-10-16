@@ -3,6 +3,7 @@ module route-graph-service
 go 1.25.1
 
 require (
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/neo4j/neo4j-go-driver/v5 v5.28.4
 	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
