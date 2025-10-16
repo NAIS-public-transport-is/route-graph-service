@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package routegraph;
+option go_package = "routegraph/proto;proto";
+
+message ID { string id = 1; }
+message Empty {}
+
+message Stop {
+  string id = 1;
+  string name = 2;
+  double lat = 3;
+  double lon = 4;
+  string zone = 5;
+  bool shelter = 6;
+}
+
+message Line {
+  string id = 1;
+  string name = 2;
+  string mode = 3;
+  int32 frequency_mins = 4;
+  bool active = 5;
+}
+
+message Vehicle {
+  string vehicle_uuid = 1;
+  string id = 2;
+  int32 capacity = 3;
+  string status = 4;
+  int64 last_seen_ts = 5;
+  double last_known_lat = 6;
+  double last_known_lon = 7;
+}
+
+message Depot {
+  string id = 1;
+  string name = 2;
+  double lat = 3;
+  double lon = 4;
+  int32 capacity = 5;
+}
+
+/* Edge messages */
+message NextEdge {
+  string from_id = 1;
+  string to_id = 2;
+  int32 travel_time = 3;
+  int32 distance = 4;
+}
+
+message ServesEdge {
+  string line_id = 1;
+  string stop_id = 2;
+  int32 order = 3;
+}
+
+message AssignedTo {
+  string vehicle_uuid = 1;
+  string line_id = 2;
+  int64 since = 3;
+}
+
+message ParkedAt {
+  string vehicle_uuid = 1;
+  string depot_id = 2;
+  int64 since = 3;
+}
+
+/* Complex RPC payloads */
+message AssignVehicleRequest { string line_id = 1; }
+message AssignVehicleResponse { Vehicle vehicle = 1; string line_id = 2; }
+
+message RecalibrateRequest {
+  string from_id = 1;
+  string to_id = 2;
+  int32 observed_avg = 3;
+}
+
+message PathRequest { string start_id = 1; string end_id = 2; int32 max_hops = 3; }
+message PathResponse { repeated string node_ids = 1; int32 hops = 2; }
+
+/* Top pairs */
+message TopPairsRequest { int32 limit = 1; }
+message Pair { string from = 1; string to = 2; int32 lines = 3; }
+message TopPairsResponse { repeated Pair pairs = 1; }
+
+/* Depots idle stats */
+message DepotsRequest { int32 limit = 1; }
+message DepotStat { string depot_id = 1; string depot_name = 2; int32 parked_count = 3; double avg_idle_ms = 4; }
+message DepotsResponse { repeated DepotStat stats = 1; }
+
+message NextListRequest { string stop_id = 1; }
+message NextListResponse { repeated NextEdge edges = 1; }
+
+message ServesListRequest { string line_id = 1; }
+message ServesListResponse { repeated ServesEdge edges = 1; }
+
+message AssignedListRequest { string vehicle_uuid = 1; }
+message AssignedListResponse { repeated AssignedTo assignments = 1; }
+
+message ParkedListRequest { string depot_id = 1; }
+message ParkedListResponse { repeated ParkedAt parked = 1; }
+
+service RouteGraph {
+  // Stops
+  rpc CreateStop(Stop) returns (Stop);
+  rpc GetStop(ID) returns (Stop);
+  rpc UpdateStop(Stop) returns (Stop);
+  rpc DeleteStop(ID) returns (Empty);
+
+  // Lines
+  rpc CreateLine(Line) returns (Line);
+  rpc GetLine(ID) returns (Line);
+  rpc UpdateLine(Line) returns (Line);
+  rpc DeleteLine(ID) returns (Empty);
+
+  // Vehicles
+  rpc CreateVehicle(Vehicle) returns (Vehicle);
+  rpc GetVehicle(ID) returns (Vehicle);
+  rpc UpdateVehicle(Vehicle) returns (Vehicle);
+  rpc DeleteVehicle(ID) returns (Empty);
+
+  // Depots
+  rpc CreateDepot(Depot) returns (Depot);
+  rpc GetDepot(ID) returns (Depot);
+  rpc UpdateDepot(Depot) returns (Depot);
+  rpc DeleteDepot(ID) returns (Empty);
+
+  // Edges CRUD
+  rpc GetNextEdge(NextEdge) returns (NextEdge);
+  rpc CreateNextEdge(NextEdge) returns (NextEdge);
+  rpc UpdateNextEdge(NextEdge) returns (NextEdge);
+  rpc DeleteNextEdge(NextEdge) returns (Empty);
+
+  rpc GetServesEdge(ServesEdge) returns (ServesEdge);
+  rpc CreateServesEdge(ServesEdge) returns (ServesEdge);
+  rpc UpdateServesEdge(ServesEdge) returns (ServesEdge);
+  rpc DeleteServesEdge(ServesEdge) returns (Empty);
+
+  rpc GetAssignedTo(AssignedTo) returns (AssignedTo);
+  rpc CreateAssignedTo(AssignedTo) returns (AssignedTo);
+  rpc UpdateAssignedTo(AssignedTo) returns (AssignedTo);
+  rpc DeleteAssignedTo(AssignedTo) returns (Empty);
+
+  rpc GetParkedAt(ParkedAt) returns (ParkedAt);
+  rpc CreateParkedAt(ParkedAt) returns (ParkedAt);
+  rpc UpdateParkedAt(ParkedAt) returns (ParkedAt);
+  rpc DeleteParkedAt(ParkedAt) returns (Empty);
+
+  // Complex queries (the 5 required)
+  rpc AssignVehicle(AssignVehicleRequest) returns (AssignVehicleResponse);
+  rpc RecalibrateEdge(RecalibrateRequest) returns (NextEdge);
+  rpc ShortestPath(PathRequest) returns (PathResponse);
+  rpc TopPairs(TopPairsRequest) returns (TopPairsResponse);
+  rpc DepotsIdleStats(DepotsRequest) returns (DepotsResponse);
+}
