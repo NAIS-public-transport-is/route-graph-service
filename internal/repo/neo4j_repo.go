@@ -328,6 +328,43 @@ func (r *NeoRepo) GetServes(ctx context.Context, lineId, stopId string) (map[str
 	return out.(map[string]any), nil
 }
 
+func (r *NeoRepo) GetServesList(ctx context.Context, lineId string) ([]map[string]any, error) {
+	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close(ctx)
+
+	out, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
+		rs, err := tx.Run(ctx, `
+			MATCH (l:Line {id:$line})-[r:SERVES]->(s:Stop)
+			RETURN s.id AS stopId, r.order AS order
+			ORDER BY r.order
+		`, map[string]any{"line": lineId})
+		if err != nil {
+			return nil, err
+		}
+		var res []map[string]any
+		for rs.Next(ctx) {
+			rec := rs.Record()
+			stopId, _ := rec.Get("stopId")
+			ord, _ := rec.Get("order")
+			res = append(res, map[string]any{
+				"stopId": stopId.(string),
+				"order":  ord.(int64),
+			})
+		}
+		if err := rs.Err(); err != nil {
+			return nil, err
+		}
+		return res, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if out == nil {
+		return []map[string]any{}, nil
+	}
+	return out.([]map[string]any), nil
+}
+
 func (r *NeoRepo) CreateServes(ctx context.Context, lineId, stopId string, order int32) error {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close(ctx)

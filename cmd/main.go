@@ -38,7 +38,7 @@ func main() {
 	ctx := context.Background()
 	defer r.Close(ctx)
 
-	lis, err := net.Listen("tcp", ":50051")
+	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func main() {
 	reflection.Register(srv)
 
 	go func() {
-		log.Println("gRPC server listening on :50051")
+		log.Println("gRPC server listening on :50052")
 		if err := srv.Serve(lis); err != nil {
 			log.Fatal(err)
 		}

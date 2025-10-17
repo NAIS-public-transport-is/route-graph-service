@@ -4,7 +4,7 @@
 // 	protoc        v6.32.1
 // source: proto/routegraph.proto
 
-package proto
+package routegraph
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -1830,7 +1830,7 @@ const file_proto_routegraph_proto_rawDesc = "" +
 	"\bmax_hops\x18\x03 \x01(\x05R\amaxHops\"N\n" +
 	"\x16GenerateReportResponse\x12\x18\n" +
 	"\acreated\x18\x01 \x01(\bR\acreated\x12\x1a\n" +
-	"\bfilename\x18\x02 \x01(\tR\bfilename2\xf8\x11\n" +
+	"\bfilename\x18\x02 \x01(\tR\bfilename2\xc5\x12\n" +
 	"\n" +
 	"RouteGraph\x120\n" +
 	"\n" +
@@ -1860,7 +1860,9 @@ const file_proto_routegraph_proto_rawDesc = "" +
 	"\x0eCreateNextEdge\x12\x14.routegraph.NextEdge\x1a\x14.routegraph.NextEdge\x12<\n" +
 	"\x0eUpdateNextEdge\x12\x14.routegraph.NextEdge\x1a\x14.routegraph.NextEdge\x129\n" +
 	"\x0eDeleteNextEdge\x12\x14.routegraph.NextEdge\x1a\x11.routegraph.Empty\x12?\n" +
-	"\rGetServesEdge\x12\x16.routegraph.ServesEdge\x1a\x16.routegraph.ServesEdge\x12B\n" +
+	"\rGetServesEdge\x12\x16.routegraph.ServesEdge\x1a\x16.routegraph.ServesEdge\x12K\n" +
+	"\n" +
+	"ServesList\x12\x1d.routegraph.ServesListRequest\x1a\x1e.routegraph.ServesListResponse\x12B\n" +
 	"\x10CreateServesEdge\x12\x16.routegraph.ServesEdge\x1a\x16.routegraph.ServesEdge\x12B\n" +
 	"\x10UpdateServesEdge\x12\x16.routegraph.ServesEdge\x1a\x16.routegraph.ServesEdge\x12=\n" +
 	"\x10DeleteServesEdge\x12\x16.routegraph.ServesEdge\x1a\x11.routegraph.Empty\x12?\n" +
@@ -1877,7 +1879,7 @@ const file_proto_routegraph_proto_rawDesc = "" +
 	"\fShortestPath\x12\x17.routegraph.PathRequest\x1a\x18.routegraph.PathResponse\x12E\n" +
 	"\bTopPairs\x12\x1b.routegraph.TopPairsRequest\x1a\x1c.routegraph.TopPairsResponse\x12H\n" +
 	"\x0fDepotsIdleStats\x12\x19.routegraph.DepotsRequest\x1a\x1a.routegraph.DepotsResponse\x12W\n" +
-	"\x0eGenerateReport\x12!.routegraph.GenerateReportRequest\x1a\".routegraph.GenerateReportResponseB\x18Z\x16routegraph/proto;protob\x06proto3"
+	"\x0eGenerateReport\x12!.routegraph.GenerateReportRequest\x1a\".routegraph.GenerateReportResponseB\x12Z\x10proto/routegraphb\x06proto3"
 
 var (
 	file_proto_routegraph_proto_rawDescOnce sync.Once
@@ -1954,63 +1956,65 @@ var file_proto_routegraph_proto_depIdxs = []int32{
 	6,  // 25: routegraph.RouteGraph.UpdateNextEdge:input_type -> routegraph.NextEdge
 	6,  // 26: routegraph.RouteGraph.DeleteNextEdge:input_type -> routegraph.NextEdge
 	7,  // 27: routegraph.RouteGraph.GetServesEdge:input_type -> routegraph.ServesEdge
-	7,  // 28: routegraph.RouteGraph.CreateServesEdge:input_type -> routegraph.ServesEdge
-	7,  // 29: routegraph.RouteGraph.UpdateServesEdge:input_type -> routegraph.ServesEdge
-	7,  // 30: routegraph.RouteGraph.DeleteServesEdge:input_type -> routegraph.ServesEdge
-	8,  // 31: routegraph.RouteGraph.GetAssignedTo:input_type -> routegraph.AssignedTo
-	8,  // 32: routegraph.RouteGraph.CreateAssignedTo:input_type -> routegraph.AssignedTo
-	8,  // 33: routegraph.RouteGraph.UpdateAssignedTo:input_type -> routegraph.AssignedTo
-	8,  // 34: routegraph.RouteGraph.DeleteAssignedTo:input_type -> routegraph.AssignedTo
-	9,  // 35: routegraph.RouteGraph.GetParkedAt:input_type -> routegraph.ParkedAt
-	9,  // 36: routegraph.RouteGraph.CreateParkedAt:input_type -> routegraph.ParkedAt
-	9,  // 37: routegraph.RouteGraph.UpdateParkedAt:input_type -> routegraph.ParkedAt
-	9,  // 38: routegraph.RouteGraph.DeleteParkedAt:input_type -> routegraph.ParkedAt
-	10, // 39: routegraph.RouteGraph.AssignVehicle:input_type -> routegraph.AssignVehicleRequest
-	12, // 40: routegraph.RouteGraph.RecalibrateEdge:input_type -> routegraph.RecalibrateRequest
-	13, // 41: routegraph.RouteGraph.ShortestPath:input_type -> routegraph.PathRequest
-	15, // 42: routegraph.RouteGraph.TopPairs:input_type -> routegraph.TopPairsRequest
-	18, // 43: routegraph.RouteGraph.DepotsIdleStats:input_type -> routegraph.DepotsRequest
-	29, // 44: routegraph.RouteGraph.GenerateReport:input_type -> routegraph.GenerateReportRequest
-	2,  // 45: routegraph.RouteGraph.CreateStop:output_type -> routegraph.Stop
-	2,  // 46: routegraph.RouteGraph.GetStop:output_type -> routegraph.Stop
-	2,  // 47: routegraph.RouteGraph.UpdateStop:output_type -> routegraph.Stop
-	1,  // 48: routegraph.RouteGraph.DeleteStop:output_type -> routegraph.Empty
-	3,  // 49: routegraph.RouteGraph.CreateLine:output_type -> routegraph.Line
-	3,  // 50: routegraph.RouteGraph.GetLine:output_type -> routegraph.Line
-	3,  // 51: routegraph.RouteGraph.UpdateLine:output_type -> routegraph.Line
-	1,  // 52: routegraph.RouteGraph.DeleteLine:output_type -> routegraph.Empty
-	4,  // 53: routegraph.RouteGraph.CreateVehicle:output_type -> routegraph.Vehicle
-	4,  // 54: routegraph.RouteGraph.GetVehicle:output_type -> routegraph.Vehicle
-	4,  // 55: routegraph.RouteGraph.UpdateVehicle:output_type -> routegraph.Vehicle
-	1,  // 56: routegraph.RouteGraph.DeleteVehicle:output_type -> routegraph.Empty
-	5,  // 57: routegraph.RouteGraph.CreateDepot:output_type -> routegraph.Depot
-	5,  // 58: routegraph.RouteGraph.GetDepot:output_type -> routegraph.Depot
-	5,  // 59: routegraph.RouteGraph.UpdateDepot:output_type -> routegraph.Depot
-	1,  // 60: routegraph.RouteGraph.DeleteDepot:output_type -> routegraph.Empty
-	6,  // 61: routegraph.RouteGraph.GetNextEdge:output_type -> routegraph.NextEdge
-	6,  // 62: routegraph.RouteGraph.CreateNextEdge:output_type -> routegraph.NextEdge
-	6,  // 63: routegraph.RouteGraph.UpdateNextEdge:output_type -> routegraph.NextEdge
-	1,  // 64: routegraph.RouteGraph.DeleteNextEdge:output_type -> routegraph.Empty
-	7,  // 65: routegraph.RouteGraph.GetServesEdge:output_type -> routegraph.ServesEdge
-	7,  // 66: routegraph.RouteGraph.CreateServesEdge:output_type -> routegraph.ServesEdge
-	7,  // 67: routegraph.RouteGraph.UpdateServesEdge:output_type -> routegraph.ServesEdge
-	1,  // 68: routegraph.RouteGraph.DeleteServesEdge:output_type -> routegraph.Empty
-	8,  // 69: routegraph.RouteGraph.GetAssignedTo:output_type -> routegraph.AssignedTo
-	8,  // 70: routegraph.RouteGraph.CreateAssignedTo:output_type -> routegraph.AssignedTo
-	8,  // 71: routegraph.RouteGraph.UpdateAssignedTo:output_type -> routegraph.AssignedTo
-	1,  // 72: routegraph.RouteGraph.DeleteAssignedTo:output_type -> routegraph.Empty
-	9,  // 73: routegraph.RouteGraph.GetParkedAt:output_type -> routegraph.ParkedAt
-	9,  // 74: routegraph.RouteGraph.CreateParkedAt:output_type -> routegraph.ParkedAt
-	9,  // 75: routegraph.RouteGraph.UpdateParkedAt:output_type -> routegraph.ParkedAt
-	1,  // 76: routegraph.RouteGraph.DeleteParkedAt:output_type -> routegraph.Empty
-	11, // 77: routegraph.RouteGraph.AssignVehicle:output_type -> routegraph.AssignVehicleResponse
-	6,  // 78: routegraph.RouteGraph.RecalibrateEdge:output_type -> routegraph.NextEdge
-	14, // 79: routegraph.RouteGraph.ShortestPath:output_type -> routegraph.PathResponse
-	17, // 80: routegraph.RouteGraph.TopPairs:output_type -> routegraph.TopPairsResponse
-	20, // 81: routegraph.RouteGraph.DepotsIdleStats:output_type -> routegraph.DepotsResponse
-	30, // 82: routegraph.RouteGraph.GenerateReport:output_type -> routegraph.GenerateReportResponse
-	45, // [45:83] is the sub-list for method output_type
-	7,  // [7:45] is the sub-list for method input_type
+	23, // 28: routegraph.RouteGraph.ServesList:input_type -> routegraph.ServesListRequest
+	7,  // 29: routegraph.RouteGraph.CreateServesEdge:input_type -> routegraph.ServesEdge
+	7,  // 30: routegraph.RouteGraph.UpdateServesEdge:input_type -> routegraph.ServesEdge
+	7,  // 31: routegraph.RouteGraph.DeleteServesEdge:input_type -> routegraph.ServesEdge
+	8,  // 32: routegraph.RouteGraph.GetAssignedTo:input_type -> routegraph.AssignedTo
+	8,  // 33: routegraph.RouteGraph.CreateAssignedTo:input_type -> routegraph.AssignedTo
+	8,  // 34: routegraph.RouteGraph.UpdateAssignedTo:input_type -> routegraph.AssignedTo
+	8,  // 35: routegraph.RouteGraph.DeleteAssignedTo:input_type -> routegraph.AssignedTo
+	9,  // 36: routegraph.RouteGraph.GetParkedAt:input_type -> routegraph.ParkedAt
+	9,  // 37: routegraph.RouteGraph.CreateParkedAt:input_type -> routegraph.ParkedAt
+	9,  // 38: routegraph.RouteGraph.UpdateParkedAt:input_type -> routegraph.ParkedAt
+	9,  // 39: routegraph.RouteGraph.DeleteParkedAt:input_type -> routegraph.ParkedAt
+	10, // 40: routegraph.RouteGraph.AssignVehicle:input_type -> routegraph.AssignVehicleRequest
+	12, // 41: routegraph.RouteGraph.RecalibrateEdge:input_type -> routegraph.RecalibrateRequest
+	13, // 42: routegraph.RouteGraph.ShortestPath:input_type -> routegraph.PathRequest
+	15, // 43: routegraph.RouteGraph.TopPairs:input_type -> routegraph.TopPairsRequest
+	18, // 44: routegraph.RouteGraph.DepotsIdleStats:input_type -> routegraph.DepotsRequest
+	29, // 45: routegraph.RouteGraph.GenerateReport:input_type -> routegraph.GenerateReportRequest
+	2,  // 46: routegraph.RouteGraph.CreateStop:output_type -> routegraph.Stop
+	2,  // 47: routegraph.RouteGraph.GetStop:output_type -> routegraph.Stop
+	2,  // 48: routegraph.RouteGraph.UpdateStop:output_type -> routegraph.Stop
+	1,  // 49: routegraph.RouteGraph.DeleteStop:output_type -> routegraph.Empty
+	3,  // 50: routegraph.RouteGraph.CreateLine:output_type -> routegraph.Line
+	3,  // 51: routegraph.RouteGraph.GetLine:output_type -> routegraph.Line
+	3,  // 52: routegraph.RouteGraph.UpdateLine:output_type -> routegraph.Line
+	1,  // 53: routegraph.RouteGraph.DeleteLine:output_type -> routegraph.Empty
+	4,  // 54: routegraph.RouteGraph.CreateVehicle:output_type -> routegraph.Vehicle
+	4,  // 55: routegraph.RouteGraph.GetVehicle:output_type -> routegraph.Vehicle
+	4,  // 56: routegraph.RouteGraph.UpdateVehicle:output_type -> routegraph.Vehicle
+	1,  // 57: routegraph.RouteGraph.DeleteVehicle:output_type -> routegraph.Empty
+	5,  // 58: routegraph.RouteGraph.CreateDepot:output_type -> routegraph.Depot
+	5,  // 59: routegraph.RouteGraph.GetDepot:output_type -> routegraph.Depot
+	5,  // 60: routegraph.RouteGraph.UpdateDepot:output_type -> routegraph.Depot
+	1,  // 61: routegraph.RouteGraph.DeleteDepot:output_type -> routegraph.Empty
+	6,  // 62: routegraph.RouteGraph.GetNextEdge:output_type -> routegraph.NextEdge
+	6,  // 63: routegraph.RouteGraph.CreateNextEdge:output_type -> routegraph.NextEdge
+	6,  // 64: routegraph.RouteGraph.UpdateNextEdge:output_type -> routegraph.NextEdge
+	1,  // 65: routegraph.RouteGraph.DeleteNextEdge:output_type -> routegraph.Empty
+	7,  // 66: routegraph.RouteGraph.GetServesEdge:output_type -> routegraph.ServesEdge
+	24, // 67: routegraph.RouteGraph.ServesList:output_type -> routegraph.ServesListResponse
+	7,  // 68: routegraph.RouteGraph.CreateServesEdge:output_type -> routegraph.ServesEdge
+	7,  // 69: routegraph.RouteGraph.UpdateServesEdge:output_type -> routegraph.ServesEdge
+	1,  // 70: routegraph.RouteGraph.DeleteServesEdge:output_type -> routegraph.Empty
+	8,  // 71: routegraph.RouteGraph.GetAssignedTo:output_type -> routegraph.AssignedTo
+	8,  // 72: routegraph.RouteGraph.CreateAssignedTo:output_type -> routegraph.AssignedTo
+	8,  // 73: routegraph.RouteGraph.UpdateAssignedTo:output_type -> routegraph.AssignedTo
+	1,  // 74: routegraph.RouteGraph.DeleteAssignedTo:output_type -> routegraph.Empty
+	9,  // 75: routegraph.RouteGraph.GetParkedAt:output_type -> routegraph.ParkedAt
+	9,  // 76: routegraph.RouteGraph.CreateParkedAt:output_type -> routegraph.ParkedAt
+	9,  // 77: routegraph.RouteGraph.UpdateParkedAt:output_type -> routegraph.ParkedAt
+	1,  // 78: routegraph.RouteGraph.DeleteParkedAt:output_type -> routegraph.Empty
+	11, // 79: routegraph.RouteGraph.AssignVehicle:output_type -> routegraph.AssignVehicleResponse
+	6,  // 80: routegraph.RouteGraph.RecalibrateEdge:output_type -> routegraph.NextEdge
+	14, // 81: routegraph.RouteGraph.ShortestPath:output_type -> routegraph.PathResponse
+	17, // 82: routegraph.RouteGraph.TopPairs:output_type -> routegraph.TopPairsResponse
+	20, // 83: routegraph.RouteGraph.DepotsIdleStats:output_type -> routegraph.DepotsResponse
+	30, // 84: routegraph.RouteGraph.GenerateReport:output_type -> routegraph.GenerateReportResponse
+	46, // [46:85] is the sub-list for method output_type
+	7,  // [7:46] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name

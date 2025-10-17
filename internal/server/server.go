@@ -227,6 +227,38 @@ func (s *Server) GetServesEdge(ctx context.Context, in *pb.ServesEdge) (*pb.Serv
 	return &pb.ServesEdge{LineId: in.LineId, StopId: in.StopId, Order: ord}, nil
 }
 
+func (s *Server) ServesList(ctx context.Context, in *pb.ServesListRequest) (*pb.ServesListResponse, error) {
+	if in == nil || in.LineId == "" {
+		return nil, fmt.Errorf("line_id required")
+	}
+	rows, err := s.repo.GetServesList(ctx, in.LineId)
+	if err != nil {
+		return nil, err
+	}
+	out := &pb.ServesListResponse{}
+	for _, r := range rows {
+		stopId, _ := r["stopId"].(string)
+		ordAny := r["order"]
+		var ord int32 = 0
+		if ordAny != nil {
+			switch v := ordAny.(type) {
+			case int64:
+				ord = int32(v)
+			case int32:
+				ord = v
+			case int:
+				ord = int32(v)
+			}
+		}
+		out.Edges = append(out.Edges, &pb.ServesEdge{
+			LineId: in.LineId,
+			StopId: stopId,
+			Order:  ord,
+		})
+	}
+	return out, nil
+}
+
 func (s *Server) CreateServesEdge(ctx context.Context, in *pb.ServesEdge) (*pb.ServesEdge, error) {
 	if err := s.repo.CreateServes(ctx, in.LineId, in.StopId, in.Order); err != nil {
 		return nil, err

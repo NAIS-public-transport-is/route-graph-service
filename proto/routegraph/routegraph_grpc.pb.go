@@ -4,7 +4,7 @@
 // - protoc             v6.32.1
 // source: proto/routegraph.proto
 
-package proto
+package routegraph
 
 import (
 	context "context"
@@ -40,6 +40,7 @@ const (
 	RouteGraph_UpdateNextEdge_FullMethodName   = "/routegraph.RouteGraph/UpdateNextEdge"
 	RouteGraph_DeleteNextEdge_FullMethodName   = "/routegraph.RouteGraph/DeleteNextEdge"
 	RouteGraph_GetServesEdge_FullMethodName    = "/routegraph.RouteGraph/GetServesEdge"
+	RouteGraph_ServesList_FullMethodName       = "/routegraph.RouteGraph/ServesList"
 	RouteGraph_CreateServesEdge_FullMethodName = "/routegraph.RouteGraph/CreateServesEdge"
 	RouteGraph_UpdateServesEdge_FullMethodName = "/routegraph.RouteGraph/UpdateServesEdge"
 	RouteGraph_DeleteServesEdge_FullMethodName = "/routegraph.RouteGraph/DeleteServesEdge"
@@ -89,6 +90,7 @@ type RouteGraphClient interface {
 	UpdateNextEdge(ctx context.Context, in *NextEdge, opts ...grpc.CallOption) (*NextEdge, error)
 	DeleteNextEdge(ctx context.Context, in *NextEdge, opts ...grpc.CallOption) (*Empty, error)
 	GetServesEdge(ctx context.Context, in *ServesEdge, opts ...grpc.CallOption) (*ServesEdge, error)
+	ServesList(ctx context.Context, in *ServesListRequest, opts ...grpc.CallOption) (*ServesListResponse, error)
 	CreateServesEdge(ctx context.Context, in *ServesEdge, opts ...grpc.CallOption) (*ServesEdge, error)
 	UpdateServesEdge(ctx context.Context, in *ServesEdge, opts ...grpc.CallOption) (*ServesEdge, error)
 	DeleteServesEdge(ctx context.Context, in *ServesEdge, opts ...grpc.CallOption) (*Empty, error)
@@ -328,6 +330,16 @@ func (c *routeGraphClient) GetServesEdge(ctx context.Context, in *ServesEdge, op
 	return out, nil
 }
 
+func (c *routeGraphClient) ServesList(ctx context.Context, in *ServesListRequest, opts ...grpc.CallOption) (*ServesListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ServesListResponse)
+	err := c.cc.Invoke(ctx, RouteGraph_ServesList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *routeGraphClient) CreateServesEdge(ctx context.Context, in *ServesEdge, opts ...grpc.CallOption) (*ServesEdge, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ServesEdge)
@@ -528,6 +540,7 @@ type RouteGraphServer interface {
 	UpdateNextEdge(context.Context, *NextEdge) (*NextEdge, error)
 	DeleteNextEdge(context.Context, *NextEdge) (*Empty, error)
 	GetServesEdge(context.Context, *ServesEdge) (*ServesEdge, error)
+	ServesList(context.Context, *ServesListRequest) (*ServesListResponse, error)
 	CreateServesEdge(context.Context, *ServesEdge) (*ServesEdge, error)
 	UpdateServesEdge(context.Context, *ServesEdge) (*ServesEdge, error)
 	DeleteServesEdge(context.Context, *ServesEdge) (*Empty, error)
@@ -619,6 +632,9 @@ func (UnimplementedRouteGraphServer) DeleteNextEdge(context.Context, *NextEdge) 
 }
 func (UnimplementedRouteGraphServer) GetServesEdge(context.Context, *ServesEdge) (*ServesEdge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetServesEdge not implemented")
+}
+func (UnimplementedRouteGraphServer) ServesList(context.Context, *ServesListRequest) (*ServesListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ServesList not implemented")
 }
 func (UnimplementedRouteGraphServer) CreateServesEdge(context.Context, *ServesEdge) (*ServesEdge, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateServesEdge not implemented")
@@ -1070,6 +1086,24 @@ func _RouteGraph_GetServesEdge_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RouteGraph_ServesList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServesListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RouteGraphServer).ServesList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RouteGraph_ServesList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RouteGraphServer).ServesList(ctx, req.(*ServesListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _RouteGraph_CreateServesEdge_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ServesEdge)
 	if err := dec(in); err != nil {
@@ -1466,6 +1500,10 @@ var RouteGraph_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetServesEdge",
 			Handler:    _RouteGraph_GetServesEdge_Handler,
+		},
+		{
+			MethodName: "ServesList",
+			Handler:    _RouteGraph_ServesList_Handler,
 		},
 		{
 			MethodName: "CreateServesEdge",

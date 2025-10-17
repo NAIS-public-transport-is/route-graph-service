@@ -145,6 +145,7 @@ service RouteGraph {
   rpc DeleteNextEdge(NextEdge) returns (Empty);
 
   rpc GetServesEdge(ServesEdge) returns (ServesEdge);
+  rpc ServesList(ServesListRequest) returns (ServesListResponse);
   rpc CreateServesEdge(ServesEdge) returns (ServesEdge);
   rpc UpdateServesEdge(ServesEdge) returns (ServesEdge);
   rpc DeleteServesEdge(ServesEdge) returns (Empty);
