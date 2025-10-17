@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"route-graph-service/internal/repo"
 	pb "route-graph-service/proto/routegraph"
@@ -393,24 +394,56 @@ func (s *Server) DepotsIdleStats(ctx context.Context, req *pb.DepotsRequest) (*p
 type Vehicle = repo.Vehicle
 type Stop = repo.Stop
 
-// Funkcija za generisanje PDF-a
-func (s *Server) GeneratePDFReport(ctx context.Context, filename string) error {
+func (s *Server) GenerateReport(ctx context.Context, req *pb.GenerateReportRequest) (*pb.GenerateReportResponse, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetTitle("Izveštaj iz baze", false)
+	pdf.SetTitle("Izvestaj iz baze", false)
 	pdf.AddPage()
 
-	vehiclesByDepot, _ := s.repo.GetVehiclesByDepot()
-	stopsByZone, _ := s.repo.GetStopsByZone()
-	occupancy, _ := s.repo.GetAverageOccupancyByDepot()
-	shortestPath, hops, _ := s.repo.ShortestPath(ctx, "S1", "S10", 10)
+	pdf.SetFont("Arial", "B", 18)
+	pdf.Cell(0, 10, "Izvestaj javnog preduzeca")
+	pdf.Ln(12)
 
+	pdf.SetFont("Arial", "", 12)
+	pdf.Cell(0, 8, fmt.Sprintf("Datum generisanja: %s", time.Now().Format("02.01.2006. 15:04")))
+	pdf.Ln(10)
+
+	pdf.SetDrawColor(0, 0, 0)
+	pdf.SetLineWidth(0.5)
+	pdf.Line(10, pdf.GetY(), 200, pdf.GetY())
+	pdf.Ln(8)
+
+	vehiclesByDepot, err := s.repo.GetVehiclesByDepot()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch vehicles: %w", err)
+	}
+	stopsByZone, err := s.repo.GetStopsByZone()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch stops: %w", err)
+	}
+
+	topStops, err := s.repo.GetTopConnectedStops(ctx, 10)
+	if err != nil {
+		return nil, fmt.Errorf("no top connected stops found: %w", err)
+	}
+
+	shortestPath, _, err := s.repo.ShortestPath(ctx, req.StartId, req.EndId, int(req.MaxHops))
+	if err != nil {
+		return nil, fmt.Errorf("no path found: %w", err)
+	}
+
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(0, 16, "Izvestaj o trenutnim vozilima parkiranim u depoima")
+	pdf.Ln(10)
 	for depot, vehicles := range vehiclesByDepot {
 		pdf.SetFont("Arial", "B", 14)
-		pdf.Cell(0, 8, fmt.Sprintf("Depot: %s", depot))
+		pdf.Cell(0, 8, fmt.Sprintf("Depo: %s", depot))
 		pdf.Ln(10)
 		addVehiclesTable(pdf, vehicles)
 	}
 
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(0, 16, "Izvestaj o stajalistima po zonama")
+	pdf.Ln(10)
 	for zone, stops := range stopsByZone {
 		pdf.SetFont("Arial", "B", 14)
 		pdf.Cell(0, 8, fmt.Sprintf("Zona: %s", zone))
@@ -418,16 +451,18 @@ func (s *Server) GeneratePDFReport(ctx context.Context, filename string) error {
 		addStopsTable(pdf, stops)
 	}
 
-	addOccupancyCharts(pdf, occupancy)
-	addShortestPath(pdf, shortestPath, hops)
+	addTopConnectedStopsChart(pdf, topStops)
+	addShortestPath(pdf, shortestPath, req.StartId, req.EndId)
 
-	return pdf.OutputFileAndClose(filename)
+	filename := "report.pdf"
+	pdf.OutputFileAndClose(filename)
+	return &pb.GenerateReportResponse{Created: true, Filename: filename}, nil
 }
 
 func addVehiclesTable(pdf *gofpdf.Fpdf, vehicles []Vehicle) {
 	pdf.SetFont("Arial", "", 12)
 	for _, v := range vehicles {
-		pdf.Cell(0, 6, fmt.Sprintf("Vehicle: %s | Status: %s | Capacity: %d", v.UUID, v.Status, v.Capacity))
+		pdf.Cell(0, 6, fmt.Sprintf("Vozilo: %s | Status: %s | Kapacitet: %d", v.UUID, v.Status, v.Capacity))
 		pdf.Ln(6)
 	}
 	pdf.Ln(4)
@@ -436,31 +471,92 @@ func addVehiclesTable(pdf *gofpdf.Fpdf, vehicles []Vehicle) {
 func addStopsTable(pdf *gofpdf.Fpdf, stops []Stop) {
 	pdf.SetFont("Arial", "", 12)
 	for _, s := range stops {
-		pdf.Cell(0, 6, fmt.Sprintf("Stop: %s | Name: %s | Shelter: %v", s.ID, s.Name, s.Shelter))
+		pdf.Cell(0, 6, fmt.Sprintf("Stajaliste: %s | Naziv: %s | Nadkriveno: %v", s.ID, s.Name, s.Shelter))
 		pdf.Ln(6)
 	}
 	pdf.Ln(4)
 }
 
-func addOccupancyCharts(pdf *gofpdf.Fpdf, occupancy map[string]float64) {
+func addTopConnectedStopsChart(pdf *gofpdf.Fpdf, stops []map[string]any) {
+	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 14)
-	pdf.Cell(0, 8, "Average Occupancy by Depot")
-	pdf.Ln(10)
-	for depot, avg := range occupancy {
-		pdf.Cell(0, 6, fmt.Sprintf("%s: %.2f", depot, avg))
-		pdf.Ln(6)
+	pdf.Cell(0, 8, "Izvestaj o najvise povezanim stajalistima")
+	pdf.Ln(12)
+
+	if len(stops) == 0 {
+		pdf.SetFont("Arial", "", 12)
+		pdf.Cell(0, 6, "Nisu pronadjena povezna stajalista.")
+		pdf.Ln(8)
+		return
 	}
-	pdf.Ln(4)
+
+	labels := make([]string, 0, len(stops))
+	vals := make([]float64, 0, len(stops))
+	maxv := float64(0)
+	for _, s := range stops {
+		name := s["stop_id"].(string)
+		if n, ok := s["stop_name"].(string); ok && n != "" {
+			name = fmt.Sprintf("%s (%s)", name, n)
+		}
+		labels = append(labels, name)
+		deg := float64(s["degree"].(int64))
+		vals = append(vals, deg)
+		if deg > maxv {
+			maxv = deg
+		}
+	}
+
+	left := 30.0
+	top := pdf.GetY() + 10.0
+	barH := 8.0
+	gap := 6.0
+	chartW := 150.0
+	for i := range labels {
+		y := top + float64(i)*(barH+gap)
+		pdf.SetXY(left, y)
+		w := 0.0
+		if maxv > 0 {
+			w = (vals[i] / maxv) * chartW
+		}
+		pdf.SetFillColor(70, 130, 180)
+		pdf.Rect(left, y, w, barH, "F")
+		pdf.SetXY(10, y)
+		pdf.SetFont("Arial", "", 9)
+		pdf.CellFormat(0, barH, labels[i], "", 0, "", false, 0, "")
+		pdf.SetXY(left+chartW+5, y)
+		pdf.CellFormat(20, barH, fmt.Sprintf("%.0f", vals[i]), "", 0, "R", false, 0, "")
+	}
+	pdf.Ln(float64(len(labels))*(barH+gap) + 10)
 }
 
-func addShortestPath(pdf *gofpdf.Fpdf, path []string, hops int) {
+func addShortestPath(pdf *gofpdf.Fpdf, path []string, start, stop string) {
+	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 14)
-	pdf.Cell(0, 8, fmt.Sprintf("Shortest Path (hops: %d)", hops))
-	pdf.Ln(10)
-	pdf.SetFont("Arial", "", 12)
-	for _, stop := range path {
-		pdf.Cell(0, 6, stop)
+	pdf.Cell(0, 8, fmt.Sprintf("Izvestaj o najkracoj putanji izmedju %s i %s", start, stop))
+	pdf.Ln(12)
+
+	if len(path) == 0 {
+		pdf.SetFont("Arial", "", 12)
+		pdf.Cell(0, 6, "Nema pronađenog puta između zadatih čvorova.")
 		pdf.Ln(6)
+		return
 	}
-	pdf.Ln(4)
+
+	startX := 30.0
+	y := pdf.GetY() + 20.0
+	step := 30.0
+	r := 6.0
+	pdf.SetLineWidth(0.7)
+	for i, node := range path {
+		x := startX + float64(i)*step
+		pdf.Circle(x, y, r, "D")
+		pdf.SetFont("Arial", "", 8)
+		pdf.SetXY(x-8, y-3)
+		pdf.CellFormat(16, 6, node, "", 0, "C", false, 0, "")
+		if i < len(path)-1 {
+			x2 := startX + float64(i+1)*step
+			pdf.Line(x+r, y, x2-r, y)
+		}
+	}
+	pdf.Ln(40)
 }

@@ -56,6 +56,7 @@ const (
 	RouteGraph_ShortestPath_FullMethodName     = "/routegraph.RouteGraph/ShortestPath"
 	RouteGraph_TopPairs_FullMethodName         = "/routegraph.RouteGraph/TopPairs"
 	RouteGraph_DepotsIdleStats_FullMethodName  = "/routegraph.RouteGraph/DepotsIdleStats"
+	RouteGraph_GenerateReport_FullMethodName   = "/routegraph.RouteGraph/GenerateReport"
 )
 
 // RouteGraphClient is the client API for RouteGraph service.
@@ -105,6 +106,8 @@ type RouteGraphClient interface {
 	ShortestPath(ctx context.Context, in *PathRequest, opts ...grpc.CallOption) (*PathResponse, error)
 	TopPairs(ctx context.Context, in *TopPairsRequest, opts ...grpc.CallOption) (*TopPairsResponse, error)
 	DepotsIdleStats(ctx context.Context, in *DepotsRequest, opts ...grpc.CallOption) (*DepotsResponse, error)
+	// Report
+	GenerateReport(ctx context.Context, in *GenerateReportRequest, opts ...grpc.CallOption) (*GenerateReportResponse, error)
 }
 
 type routeGraphClient struct {
@@ -485,6 +488,16 @@ func (c *routeGraphClient) DepotsIdleStats(ctx context.Context, in *DepotsReques
 	return out, nil
 }
 
+func (c *routeGraphClient) GenerateReport(ctx context.Context, in *GenerateReportRequest, opts ...grpc.CallOption) (*GenerateReportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateReportResponse)
+	err := c.cc.Invoke(ctx, RouteGraph_GenerateReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RouteGraphServer is the server API for RouteGraph service.
 // All implementations must embed UnimplementedRouteGraphServer
 // for forward compatibility.
@@ -532,6 +545,8 @@ type RouteGraphServer interface {
 	ShortestPath(context.Context, *PathRequest) (*PathResponse, error)
 	TopPairs(context.Context, *TopPairsRequest) (*TopPairsResponse, error)
 	DepotsIdleStats(context.Context, *DepotsRequest) (*DepotsResponse, error)
+	// Report
+	GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error)
 	mustEmbedUnimplementedRouteGraphServer()
 }
 
@@ -652,6 +667,9 @@ func (UnimplementedRouteGraphServer) TopPairs(context.Context, *TopPairsRequest)
 }
 func (UnimplementedRouteGraphServer) DepotsIdleStats(context.Context, *DepotsRequest) (*DepotsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DepotsIdleStats not implemented")
+}
+func (UnimplementedRouteGraphServer) GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateReport not implemented")
 }
 func (UnimplementedRouteGraphServer) mustEmbedUnimplementedRouteGraphServer() {}
 func (UnimplementedRouteGraphServer) testEmbeddedByValue()                    {}
@@ -1340,6 +1358,24 @@ func _RouteGraph_DepotsIdleStats_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RouteGraph_GenerateReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RouteGraphServer).GenerateReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RouteGraph_GenerateReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RouteGraphServer).GenerateReport(ctx, req.(*GenerateReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RouteGraph_ServiceDesc is the grpc.ServiceDesc for RouteGraph service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1494,6 +1530,10 @@ var RouteGraph_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DepotsIdleStats",
 			Handler:    _RouteGraph_DepotsIdleStats_Handler,
+		},
+		{
+			MethodName: "GenerateReport",
+			Handler:    _RouteGraph_GenerateReport_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

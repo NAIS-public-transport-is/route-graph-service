@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package routegraph;
-option go_package = "routegraph/proto;proto";
+option go_package = "proto/routegraph";
 
 message ID { string id = 1; }
 message Empty {}
@@ -102,6 +102,17 @@ message AssignedListResponse { repeated AssignedTo assignments = 1; }
 message ParkedListRequest { string depot_id = 1; }
 message ParkedListResponse { repeated ParkedAt parked = 1; }
 
+message GenerateReportRequest {
+  string start_id = 1;
+  string end_id = 2;
+  int32 max_hops = 3;
+}
+
+message GenerateReportResponse {
+  bool created = 1;
+  string filename = 2;
+}
+
 service RouteGraph {
   // Stops
   rpc CreateStop(Stop) returns (Stop);
@@ -154,4 +165,7 @@ service RouteGraph {
   rpc ShortestPath(PathRequest) returns (PathResponse);
   rpc TopPairs(TopPairsRequest) returns (TopPairsResponse);
   rpc DepotsIdleStats(DepotsRequest) returns (DepotsResponse);
+
+  // Report
+  rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
 }

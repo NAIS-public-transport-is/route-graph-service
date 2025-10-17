@@ -1605,6 +1605,118 @@ func (x *ParkedListResponse) GetParked() []*ParkedAt {
 	return nil
 }
 
+type GenerateReportRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StartId       string                 `protobuf:"bytes,1,opt,name=start_id,json=startId,proto3" json:"start_id,omitempty"`
+	EndId         string                 `protobuf:"bytes,2,opt,name=end_id,json=endId,proto3" json:"end_id,omitempty"`
+	MaxHops       int32                  `protobuf:"varint,3,opt,name=max_hops,json=maxHops,proto3" json:"max_hops,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateReportRequest) Reset() {
+	*x = GenerateReportRequest{}
+	mi := &file_proto_routegraph_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateReportRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateReportRequest) ProtoMessage() {}
+
+func (x *GenerateReportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_routegraph_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateReportRequest.ProtoReflect.Descriptor instead.
+func (*GenerateReportRequest) Descriptor() ([]byte, []int) {
+	return file_proto_routegraph_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *GenerateReportRequest) GetStartId() string {
+	if x != nil {
+		return x.StartId
+	}
+	return ""
+}
+
+func (x *GenerateReportRequest) GetEndId() string {
+	if x != nil {
+		return x.EndId
+	}
+	return ""
+}
+
+func (x *GenerateReportRequest) GetMaxHops() int32 {
+	if x != nil {
+		return x.MaxHops
+	}
+	return 0
+}
+
+type GenerateReportResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Created       bool                   `protobuf:"varint,1,opt,name=created,proto3" json:"created,omitempty"`
+	Filename      string                 `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateReportResponse) Reset() {
+	*x = GenerateReportResponse{}
+	mi := &file_proto_routegraph_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateReportResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateReportResponse) ProtoMessage() {}
+
+func (x *GenerateReportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_routegraph_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateReportResponse.ProtoReflect.Descriptor instead.
+func (*GenerateReportResponse) Descriptor() ([]byte, []int) {
+	return file_proto_routegraph_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GenerateReportResponse) GetCreated() bool {
+	if x != nil {
+		return x.Created
+	}
+	return false
+}
+
+func (x *GenerateReportResponse) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
 var File_proto_routegraph_proto protoreflect.FileDescriptor
 
 const file_proto_routegraph_proto_rawDesc = "" +
@@ -1711,7 +1823,14 @@ const file_proto_routegraph_proto_rawDesc = "" +
 	"\x11ParkedListRequest\x12\x19\n" +
 	"\bdepot_id\x18\x01 \x01(\tR\adepotId\"B\n" +
 	"\x12ParkedListResponse\x12,\n" +
-	"\x06parked\x18\x01 \x03(\v2\x14.routegraph.ParkedAtR\x06parked2\x9f\x11\n" +
+	"\x06parked\x18\x01 \x03(\v2\x14.routegraph.ParkedAtR\x06parked\"d\n" +
+	"\x15GenerateReportRequest\x12\x19\n" +
+	"\bstart_id\x18\x01 \x01(\tR\astartId\x12\x15\n" +
+	"\x06end_id\x18\x02 \x01(\tR\x05endId\x12\x19\n" +
+	"\bmax_hops\x18\x03 \x01(\x05R\amaxHops\"N\n" +
+	"\x16GenerateReportResponse\x12\x18\n" +
+	"\acreated\x18\x01 \x01(\bR\acreated\x12\x1a\n" +
+	"\bfilename\x18\x02 \x01(\tR\bfilename2\xf8\x11\n" +
 	"\n" +
 	"RouteGraph\x120\n" +
 	"\n" +
@@ -1757,7 +1876,8 @@ const file_proto_routegraph_proto_rawDesc = "" +
 	"\x0fRecalibrateEdge\x12\x1e.routegraph.RecalibrateRequest\x1a\x14.routegraph.NextEdge\x12A\n" +
 	"\fShortestPath\x12\x17.routegraph.PathRequest\x1a\x18.routegraph.PathResponse\x12E\n" +
 	"\bTopPairs\x12\x1b.routegraph.TopPairsRequest\x1a\x1c.routegraph.TopPairsResponse\x12H\n" +
-	"\x0fDepotsIdleStats\x12\x19.routegraph.DepotsRequest\x1a\x1a.routegraph.DepotsResponseB\x18Z\x16routegraph/proto;protob\x06proto3"
+	"\x0fDepotsIdleStats\x12\x19.routegraph.DepotsRequest\x1a\x1a.routegraph.DepotsResponse\x12W\n" +
+	"\x0eGenerateReport\x12!.routegraph.GenerateReportRequest\x1a\".routegraph.GenerateReportResponseB\x18Z\x16routegraph/proto;protob\x06proto3"
 
 var (
 	file_proto_routegraph_proto_rawDescOnce sync.Once
@@ -1771,37 +1891,39 @@ func file_proto_routegraph_proto_rawDescGZIP() []byte {
 	return file_proto_routegraph_proto_rawDescData
 }
 
-var file_proto_routegraph_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_proto_routegraph_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_proto_routegraph_proto_goTypes = []any{
-	(*ID)(nil),                    // 0: routegraph.ID
-	(*Empty)(nil),                 // 1: routegraph.Empty
-	(*Stop)(nil),                  // 2: routegraph.Stop
-	(*Line)(nil),                  // 3: routegraph.Line
-	(*Vehicle)(nil),               // 4: routegraph.Vehicle
-	(*Depot)(nil),                 // 5: routegraph.Depot
-	(*NextEdge)(nil),              // 6: routegraph.NextEdge
-	(*ServesEdge)(nil),            // 7: routegraph.ServesEdge
-	(*AssignedTo)(nil),            // 8: routegraph.AssignedTo
-	(*ParkedAt)(nil),              // 9: routegraph.ParkedAt
-	(*AssignVehicleRequest)(nil),  // 10: routegraph.AssignVehicleRequest
-	(*AssignVehicleResponse)(nil), // 11: routegraph.AssignVehicleResponse
-	(*RecalibrateRequest)(nil),    // 12: routegraph.RecalibrateRequest
-	(*PathRequest)(nil),           // 13: routegraph.PathRequest
-	(*PathResponse)(nil),          // 14: routegraph.PathResponse
-	(*TopPairsRequest)(nil),       // 15: routegraph.TopPairsRequest
-	(*Pair)(nil),                  // 16: routegraph.Pair
-	(*TopPairsResponse)(nil),      // 17: routegraph.TopPairsResponse
-	(*DepotsRequest)(nil),         // 18: routegraph.DepotsRequest
-	(*DepotStat)(nil),             // 19: routegraph.DepotStat
-	(*DepotsResponse)(nil),        // 20: routegraph.DepotsResponse
-	(*NextListRequest)(nil),       // 21: routegraph.NextListRequest
-	(*NextListResponse)(nil),      // 22: routegraph.NextListResponse
-	(*ServesListRequest)(nil),     // 23: routegraph.ServesListRequest
-	(*ServesListResponse)(nil),    // 24: routegraph.ServesListResponse
-	(*AssignedListRequest)(nil),   // 25: routegraph.AssignedListRequest
-	(*AssignedListResponse)(nil),  // 26: routegraph.AssignedListResponse
-	(*ParkedListRequest)(nil),     // 27: routegraph.ParkedListRequest
-	(*ParkedListResponse)(nil),    // 28: routegraph.ParkedListResponse
+	(*ID)(nil),                     // 0: routegraph.ID
+	(*Empty)(nil),                  // 1: routegraph.Empty
+	(*Stop)(nil),                   // 2: routegraph.Stop
+	(*Line)(nil),                   // 3: routegraph.Line
+	(*Vehicle)(nil),                // 4: routegraph.Vehicle
+	(*Depot)(nil),                  // 5: routegraph.Depot
+	(*NextEdge)(nil),               // 6: routegraph.NextEdge
+	(*ServesEdge)(nil),             // 7: routegraph.ServesEdge
+	(*AssignedTo)(nil),             // 8: routegraph.AssignedTo
+	(*ParkedAt)(nil),               // 9: routegraph.ParkedAt
+	(*AssignVehicleRequest)(nil),   // 10: routegraph.AssignVehicleRequest
+	(*AssignVehicleResponse)(nil),  // 11: routegraph.AssignVehicleResponse
+	(*RecalibrateRequest)(nil),     // 12: routegraph.RecalibrateRequest
+	(*PathRequest)(nil),            // 13: routegraph.PathRequest
+	(*PathResponse)(nil),           // 14: routegraph.PathResponse
+	(*TopPairsRequest)(nil),        // 15: routegraph.TopPairsRequest
+	(*Pair)(nil),                   // 16: routegraph.Pair
+	(*TopPairsResponse)(nil),       // 17: routegraph.TopPairsResponse
+	(*DepotsRequest)(nil),          // 18: routegraph.DepotsRequest
+	(*DepotStat)(nil),              // 19: routegraph.DepotStat
+	(*DepotsResponse)(nil),         // 20: routegraph.DepotsResponse
+	(*NextListRequest)(nil),        // 21: routegraph.NextListRequest
+	(*NextListResponse)(nil),       // 22: routegraph.NextListResponse
+	(*ServesListRequest)(nil),      // 23: routegraph.ServesListRequest
+	(*ServesListResponse)(nil),     // 24: routegraph.ServesListResponse
+	(*AssignedListRequest)(nil),    // 25: routegraph.AssignedListRequest
+	(*AssignedListResponse)(nil),   // 26: routegraph.AssignedListResponse
+	(*ParkedListRequest)(nil),      // 27: routegraph.ParkedListRequest
+	(*ParkedListResponse)(nil),     // 28: routegraph.ParkedListResponse
+	(*GenerateReportRequest)(nil),  // 29: routegraph.GenerateReportRequest
+	(*GenerateReportResponse)(nil), // 30: routegraph.GenerateReportResponse
 }
 var file_proto_routegraph_proto_depIdxs = []int32{
 	4,  // 0: routegraph.AssignVehicleResponse.vehicle:type_name -> routegraph.Vehicle
@@ -1848,45 +1970,47 @@ var file_proto_routegraph_proto_depIdxs = []int32{
 	13, // 41: routegraph.RouteGraph.ShortestPath:input_type -> routegraph.PathRequest
 	15, // 42: routegraph.RouteGraph.TopPairs:input_type -> routegraph.TopPairsRequest
 	18, // 43: routegraph.RouteGraph.DepotsIdleStats:input_type -> routegraph.DepotsRequest
-	2,  // 44: routegraph.RouteGraph.CreateStop:output_type -> routegraph.Stop
-	2,  // 45: routegraph.RouteGraph.GetStop:output_type -> routegraph.Stop
-	2,  // 46: routegraph.RouteGraph.UpdateStop:output_type -> routegraph.Stop
-	1,  // 47: routegraph.RouteGraph.DeleteStop:output_type -> routegraph.Empty
-	3,  // 48: routegraph.RouteGraph.CreateLine:output_type -> routegraph.Line
-	3,  // 49: routegraph.RouteGraph.GetLine:output_type -> routegraph.Line
-	3,  // 50: routegraph.RouteGraph.UpdateLine:output_type -> routegraph.Line
-	1,  // 51: routegraph.RouteGraph.DeleteLine:output_type -> routegraph.Empty
-	4,  // 52: routegraph.RouteGraph.CreateVehicle:output_type -> routegraph.Vehicle
-	4,  // 53: routegraph.RouteGraph.GetVehicle:output_type -> routegraph.Vehicle
-	4,  // 54: routegraph.RouteGraph.UpdateVehicle:output_type -> routegraph.Vehicle
-	1,  // 55: routegraph.RouteGraph.DeleteVehicle:output_type -> routegraph.Empty
-	5,  // 56: routegraph.RouteGraph.CreateDepot:output_type -> routegraph.Depot
-	5,  // 57: routegraph.RouteGraph.GetDepot:output_type -> routegraph.Depot
-	5,  // 58: routegraph.RouteGraph.UpdateDepot:output_type -> routegraph.Depot
-	1,  // 59: routegraph.RouteGraph.DeleteDepot:output_type -> routegraph.Empty
-	6,  // 60: routegraph.RouteGraph.GetNextEdge:output_type -> routegraph.NextEdge
-	6,  // 61: routegraph.RouteGraph.CreateNextEdge:output_type -> routegraph.NextEdge
-	6,  // 62: routegraph.RouteGraph.UpdateNextEdge:output_type -> routegraph.NextEdge
-	1,  // 63: routegraph.RouteGraph.DeleteNextEdge:output_type -> routegraph.Empty
-	7,  // 64: routegraph.RouteGraph.GetServesEdge:output_type -> routegraph.ServesEdge
-	7,  // 65: routegraph.RouteGraph.CreateServesEdge:output_type -> routegraph.ServesEdge
-	7,  // 66: routegraph.RouteGraph.UpdateServesEdge:output_type -> routegraph.ServesEdge
-	1,  // 67: routegraph.RouteGraph.DeleteServesEdge:output_type -> routegraph.Empty
-	8,  // 68: routegraph.RouteGraph.GetAssignedTo:output_type -> routegraph.AssignedTo
-	8,  // 69: routegraph.RouteGraph.CreateAssignedTo:output_type -> routegraph.AssignedTo
-	8,  // 70: routegraph.RouteGraph.UpdateAssignedTo:output_type -> routegraph.AssignedTo
-	1,  // 71: routegraph.RouteGraph.DeleteAssignedTo:output_type -> routegraph.Empty
-	9,  // 72: routegraph.RouteGraph.GetParkedAt:output_type -> routegraph.ParkedAt
-	9,  // 73: routegraph.RouteGraph.CreateParkedAt:output_type -> routegraph.ParkedAt
-	9,  // 74: routegraph.RouteGraph.UpdateParkedAt:output_type -> routegraph.ParkedAt
-	1,  // 75: routegraph.RouteGraph.DeleteParkedAt:output_type -> routegraph.Empty
-	11, // 76: routegraph.RouteGraph.AssignVehicle:output_type -> routegraph.AssignVehicleResponse
-	6,  // 77: routegraph.RouteGraph.RecalibrateEdge:output_type -> routegraph.NextEdge
-	14, // 78: routegraph.RouteGraph.ShortestPath:output_type -> routegraph.PathResponse
-	17, // 79: routegraph.RouteGraph.TopPairs:output_type -> routegraph.TopPairsResponse
-	20, // 80: routegraph.RouteGraph.DepotsIdleStats:output_type -> routegraph.DepotsResponse
-	44, // [44:81] is the sub-list for method output_type
-	7,  // [7:44] is the sub-list for method input_type
+	29, // 44: routegraph.RouteGraph.GenerateReport:input_type -> routegraph.GenerateReportRequest
+	2,  // 45: routegraph.RouteGraph.CreateStop:output_type -> routegraph.Stop
+	2,  // 46: routegraph.RouteGraph.GetStop:output_type -> routegraph.Stop
+	2,  // 47: routegraph.RouteGraph.UpdateStop:output_type -> routegraph.Stop
+	1,  // 48: routegraph.RouteGraph.DeleteStop:output_type -> routegraph.Empty
+	3,  // 49: routegraph.RouteGraph.CreateLine:output_type -> routegraph.Line
+	3,  // 50: routegraph.RouteGraph.GetLine:output_type -> routegraph.Line
+	3,  // 51: routegraph.RouteGraph.UpdateLine:output_type -> routegraph.Line
+	1,  // 52: routegraph.RouteGraph.DeleteLine:output_type -> routegraph.Empty
+	4,  // 53: routegraph.RouteGraph.CreateVehicle:output_type -> routegraph.Vehicle
+	4,  // 54: routegraph.RouteGraph.GetVehicle:output_type -> routegraph.Vehicle
+	4,  // 55: routegraph.RouteGraph.UpdateVehicle:output_type -> routegraph.Vehicle
+	1,  // 56: routegraph.RouteGraph.DeleteVehicle:output_type -> routegraph.Empty
+	5,  // 57: routegraph.RouteGraph.CreateDepot:output_type -> routegraph.Depot
+	5,  // 58: routegraph.RouteGraph.GetDepot:output_type -> routegraph.Depot
+	5,  // 59: routegraph.RouteGraph.UpdateDepot:output_type -> routegraph.Depot
+	1,  // 60: routegraph.RouteGraph.DeleteDepot:output_type -> routegraph.Empty
+	6,  // 61: routegraph.RouteGraph.GetNextEdge:output_type -> routegraph.NextEdge
+	6,  // 62: routegraph.RouteGraph.CreateNextEdge:output_type -> routegraph.NextEdge
+	6,  // 63: routegraph.RouteGraph.UpdateNextEdge:output_type -> routegraph.NextEdge
+	1,  // 64: routegraph.RouteGraph.DeleteNextEdge:output_type -> routegraph.Empty
+	7,  // 65: routegraph.RouteGraph.GetServesEdge:output_type -> routegraph.ServesEdge
+	7,  // 66: routegraph.RouteGraph.CreateServesEdge:output_type -> routegraph.ServesEdge
+	7,  // 67: routegraph.RouteGraph.UpdateServesEdge:output_type -> routegraph.ServesEdge
+	1,  // 68: routegraph.RouteGraph.DeleteServesEdge:output_type -> routegraph.Empty
+	8,  // 69: routegraph.RouteGraph.GetAssignedTo:output_type -> routegraph.AssignedTo
+	8,  // 70: routegraph.RouteGraph.CreateAssignedTo:output_type -> routegraph.AssignedTo
+	8,  // 71: routegraph.RouteGraph.UpdateAssignedTo:output_type -> routegraph.AssignedTo
+	1,  // 72: routegraph.RouteGraph.DeleteAssignedTo:output_type -> routegraph.Empty
+	9,  // 73: routegraph.RouteGraph.GetParkedAt:output_type -> routegraph.ParkedAt
+	9,  // 74: routegraph.RouteGraph.CreateParkedAt:output_type -> routegraph.ParkedAt
+	9,  // 75: routegraph.RouteGraph.UpdateParkedAt:output_type -> routegraph.ParkedAt
+	1,  // 76: routegraph.RouteGraph.DeleteParkedAt:output_type -> routegraph.Empty
+	11, // 77: routegraph.RouteGraph.AssignVehicle:output_type -> routegraph.AssignVehicleResponse
+	6,  // 78: routegraph.RouteGraph.RecalibrateEdge:output_type -> routegraph.NextEdge
+	14, // 79: routegraph.RouteGraph.ShortestPath:output_type -> routegraph.PathResponse
+	17, // 80: routegraph.RouteGraph.TopPairs:output_type -> routegraph.TopPairsResponse
+	20, // 81: routegraph.RouteGraph.DepotsIdleStats:output_type -> routegraph.DepotsResponse
+	30, // 82: routegraph.RouteGraph.GenerateReport:output_type -> routegraph.GenerateReportResponse
+	45, // [45:83] is the sub-list for method output_type
+	7,  // [7:45] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -1903,7 +2027,7 @@ func file_proto_routegraph_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_routegraph_proto_rawDesc), len(file_proto_routegraph_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   29,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

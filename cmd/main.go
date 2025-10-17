@@ -49,12 +49,6 @@ func main() {
 
 	reflection.Register(srv)
 
-	err = s.GeneratePDFReport(context.Background(), "report.pdf")
-	if err != nil {
-		log.Fatalf("Failed to generate PDF report: %v", err)
-	}
-	log.Println("PDF report generated successfully.")
-
 	go func() {
 		log.Println("gRPC server listening on :50051")
 		if err := srv.Serve(lis); err != nil {

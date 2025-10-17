@@ -500,8 +500,7 @@ func (r *NeoRepo) DeleteParkedAt(ctx context.Context, vehicleUUID, depotId strin
 /* ========== COMPLEX QUERIES (the 5 required) ========== */
 
 /*
- 1. Assign nearest idle vehicle to line (complex CRUD)
-    MATCH... WHERE... WITH... + CREATE + UPDATE in one transaction
+1. Assign nearest idle vehicle to line (complex CRUD)
 */
 func (r *NeoRepo) AssignNearestIdleVehicle(ctx context.Context, lineId string) (map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -561,8 +560,7 @@ func (r *NeoRepo) AssignNearestIdleVehicle(ctx context.Context, lineId string) (
 }
 
 /*
- 2. Recalibrate NEXT: conditional update on relationship (complex CRUD)
-    This uses MATCH, WHERE, WITH in the cypher inside ExecuteWrite
+2. Recalibrate NEXT: conditional update on relationship (complex CRUD)
 */
 func (r *NeoRepo) RecalibrateNext(ctx context.Context, from, to string, observed int32) (map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -775,28 +773,49 @@ func (r *NeoRepo) GetStopsByZone() (map[string][]Stop, error) {
 	return result, err
 }
 
-func (r *NeoRepo) GetAverageOccupancyByDepot() (map[string]float64, error) {
-	ctx := context.Background()
+func (r *NeoRepo) GetTopConnectedStops(ctx context.Context, limit int) ([]map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)
 
-	result := make(map[string]float64)
+	out := []map[string]any{}
 	_, err := session.ExecuteRead(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
 		query := `
-			MATCH (v:Vehicle)-[:PARKED_AT]->(d:Depot)
-			RETURN d.name, avg(v.capacity * CASE WHEN v.status='ACTIVE' THEN 1 ELSE 0 END) as avgOccupied
-		`
-		rs, err := tx.Run(ctx, query, nil)
+            MATCH (s:Stop)
+            OPTIONAL MATCH (s)-[:NEXT]->(o:Stop)
+            WITH s, count(DISTINCT o) AS outdeg
+            OPTIONAL MATCH (s)<-[:NEXT]-(i:Stop)
+            WITH s, outdeg, count(DISTINCT i) AS indeg
+            WITH s, (outdeg + indeg) AS degree
+            WHERE degree > 0
+            RETURN s.id AS stop_id, s.name AS stop_name, degree
+            ORDER BY degree DESC
+            LIMIT $limit
+        `
+		rs, err := tx.Run(ctx, query, map[string]any{"limit": limit})
 		if err != nil {
 			return nil, err
 		}
 		for rs.Next(ctx) {
 			rec := rs.Record()
-			depot := rec.Values[0].(string)
-			avg := rec.Values[1].(float64)
-			result[depot] = avg
+			stopId := ""
+			if rec.Values[0] != nil {
+				stopId = rec.Values[0].(string)
+			}
+			stopName := ""
+			if rec.Values[1] != nil {
+				stopName = rec.Values[1].(string)
+			}
+			deg := int64(0)
+			if rec.Values[2] != nil {
+				deg = rec.Values[2].(int64)
+			}
+			out = append(out, map[string]any{
+				"stop_id":   stopId,
+				"stop_name": stopName,
+				"degree":    deg,
+			})
 		}
 		return nil, nil
 	})
-	return result, err
+	return out, err
 }

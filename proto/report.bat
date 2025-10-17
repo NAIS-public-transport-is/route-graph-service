@@ -1,0 +1,1 @@
+grpcurl.exe -plaintext -d "{ \"start_id\": \"S1\", \"end_id\": \"S10\", \"max_hops\": 10 }" localhost:50051 routegraph.RouteGraph/GenerateReport
