@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"route-graph-service/internal/repo"
@@ -21,7 +22,6 @@ func NewServer(r *repo.NeoRepo) *Server {
 	return &Server{repo: r}
 }
 
-/* Stops */
 func (s *Server) CreateStop(ctx context.Context, in *pb.Stop) (*pb.Stop, error) {
 	if in == nil || in.Id == "" {
 		return nil, fmt.Errorf("invalid stop")
@@ -62,7 +62,6 @@ func (s *Server) DeleteStop(ctx context.Context, in *pb.ID) (*pb.Empty, error) {
 	return &pb.Empty{}, nil
 }
 
-/* Lines */
 func (s *Server) CreateLine(ctx context.Context, in *pb.Line) (*pb.Line, error) {
 	if in == nil || in.Id == "" {
 		return nil, fmt.Errorf("invalid line")
@@ -96,7 +95,6 @@ func (s *Server) DeleteLine(ctx context.Context, in *pb.ID) (*pb.Empty, error) {
 	return &pb.Empty{}, nil
 }
 
-/* Vehicles */
 func (s *Server) CreateVehicle(ctx context.Context, in *pb.Vehicle) (*pb.Vehicle, error) {
 	if in == nil || in.VehicleUuid == "" {
 		return nil, fmt.Errorf("invalid vehicle")
@@ -138,7 +136,6 @@ func (s *Server) DeleteVehicle(ctx context.Context, in *pb.ID) (*pb.Empty, error
 	return &pb.Empty{}, nil
 }
 
-/* Depots */
 func (s *Server) CreateDepot(ctx context.Context, in *pb.Depot) (*pb.Depot, error) {
 	props := map[string]any{"id": in.Id, "name": in.Name, "lat": in.Lat, "lon": in.Lon, "capacity": in.Capacity}
 	if err := s.repo.CreateDepot(ctx, props); err != nil {
@@ -170,7 +167,6 @@ func (s *Server) DeleteDepot(ctx context.Context, in *pb.ID) (*pb.Empty, error) 
 	return &pb.Empty{}, nil
 }
 
-/* Edge RPCs */
 func (s *Server) GetNextEdge(ctx context.Context, in *pb.NextEdge) (*pb.NextEdge, error) {
 	m, err := s.repo.GetNext(ctx, in.FromId, in.ToId)
 	if err != nil {
@@ -357,7 +353,7 @@ func (s *Server) DeleteParkedAt(ctx context.Context, in *pb.ParkedAt) (*pb.Empty
 	return &pb.Empty{}, nil
 }
 
-/* ========== Complex RPCs mapping ========== */
+/* Complex RPCs mapping */
 
 func (s *Server) AssignVehicle(ctx context.Context, req *pb.AssignVehicleRequest) (*pb.AssignVehicleResponse, error) {
 	out, err := s.repo.AssignNearestIdleVehicle(ctx, req.LineId)
@@ -460,7 +456,18 @@ func (s *Server) GenerateReport(ctx context.Context, req *pb.GenerateReportReque
 
 	shortestPath, _, err := s.repo.ShortestPath(ctx, req.StartId, req.EndId, int(req.MaxHops))
 	if err != nil {
+		log.Printf("no path found: %v", err)
 		return nil, fmt.Errorf("no path found: %w", err)
+	}
+
+	topPairsResp, err := s.TopPairs(ctx, &pb.TopPairsRequest{Limit: 5})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch top pairs: %w", err)
+	}
+
+	depotStatsResp, err := s.DepotsIdleStats(ctx, &pb.DepotsRequest{Limit: 5})
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch depot stats: %w", err)
 	}
 
 	pdf.SetFont("Arial", "B", 16)
@@ -483,6 +490,8 @@ func (s *Server) GenerateReport(ctx context.Context, req *pb.GenerateReportReque
 		addStopsTable(pdf, stops)
 	}
 
+	addTopPairsSection(pdf, topPairsResp)
+	addDepotsIdleStats(pdf, depotStatsResp)
 	addTopConnectedStopsChart(pdf, topStops)
 	addShortestPath(pdf, shortestPath, req.StartId, req.EndId)
 
@@ -507,6 +516,33 @@ func addStopsTable(pdf *gofpdf.Fpdf, stops []Stop) {
 		pdf.Ln(6)
 	}
 	pdf.Ln(4)
+}
+
+func addTopPairsSection(pdf *gofpdf.Fpdf, resp *pb.TopPairsResponse) {
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(0, 10, "Top 5 Najcesce povezanih parova Stanica")
+	pdf.Ln(10)
+	pdf.SetFont("Arial", "", 12)
+
+	for _, pair := range resp.Pairs {
+		pdf.Cell(0, 8, fmt.Sprintf("Od: %-8s  Do: %-8s  | Broj linija: %d", pair.From, pair.To, pair.Lines))
+		pdf.Ln(8)
+	}
+	pdf.Ln(10)
+}
+
+func addDepotsIdleStats(pdf *gofpdf.Fpdf, resp *pb.DepotsResponse) {
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(0, 10, "Statistike depoa - broj parkiranih vozila i prosecno vreme mirovanja")
+	pdf.Ln(10)
+	pdf.SetFont("Arial", "", 12)
+
+	for _, stat := range resp.Stats {
+		pdf.Cell(0, 8, fmt.Sprintf("Depo: %-12s | Parkirano: %d | Prosecno mirovanje: %.2f ms",
+			stat.DepotName, stat.ParkedCount, stat.AvgIdleMs))
+		pdf.Ln(8)
+	}
+	pdf.Ln(10)
 }
 
 func addTopConnectedStopsChart(pdf *gofpdf.Fpdf, stops []map[string]any) {
@@ -562,7 +598,6 @@ func addTopConnectedStopsChart(pdf *gofpdf.Fpdf, stops []map[string]any) {
 }
 
 func addShortestPath(pdf *gofpdf.Fpdf, path []string, start, stop string) {
-	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(0, 8, fmt.Sprintf("Izvestaj o najkracoj putanji izmedju %s i %s", start, stop))
 	pdf.Ln(12)

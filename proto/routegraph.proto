@@ -41,7 +41,6 @@ message Depot {
   int32 capacity = 5;
 }
 
-/* Edge messages */
 message NextEdge {
   string from_id = 1;
   string to_id = 2;
@@ -67,7 +66,6 @@ message ParkedAt {
   int64 since = 3;
 }
 
-/* Complex RPC payloads */
 message AssignVehicleRequest { string line_id = 1; }
 message AssignVehicleResponse { Vehicle vehicle = 1; string line_id = 2; }
 
@@ -80,12 +78,10 @@ message RecalibrateRequest {
 message PathRequest { string start_id = 1; string end_id = 2; int32 max_hops = 3; }
 message PathResponse { repeated string node_ids = 1; int32 hops = 2; }
 
-/* Top pairs */
 message TopPairsRequest { int32 limit = 1; }
 message Pair { string from = 1; string to = 2; int32 lines = 3; }
 message TopPairsResponse { repeated Pair pairs = 1; }
 
-/* Depots idle stats */
 message DepotsRequest { int32 limit = 1; }
 message DepotStat { string depot_id = 1; string depot_name = 2; int32 parked_count = 3; double avg_idle_ms = 4; }
 message DepotsResponse { repeated DepotStat stats = 1; }
@@ -160,7 +156,7 @@ service RouteGraph {
   rpc UpdateParkedAt(ParkedAt) returns (ParkedAt);
   rpc DeleteParkedAt(ParkedAt) returns (Empty);
 
-  // Complex queries (the 5 required)
+  // Complex queries
   rpc AssignVehicle(AssignVehicleRequest) returns (AssignVehicleResponse);
   rpc RecalibrateEdge(RecalibrateRequest) returns (NextEdge);
   rpc ShortestPath(PathRequest) returns (PathResponse);

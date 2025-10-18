@@ -534,7 +534,7 @@ func (r *NeoRepo) DeleteParkedAt(ctx context.Context, vehicleUUID, depotId strin
 	return err
 }
 
-/* ========== COMPLEX QUERIES (the 5 required) ========== */
+/* COMPLEX QUERIES */
 
 /*
 1. Assign nearest idle vehicle to line (complex CRUD)
@@ -543,7 +543,6 @@ func (r *NeoRepo) AssignNearestIdleVehicle(ctx context.Context, lineId string) (
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close(ctx)
 	out, err := session.ExecuteWrite(ctx, func(tx neo4j.ManagedTransaction) (any, error) {
-		// get start stop
 		rs, err := tx.Run(ctx, `
             MATCH (l:Line {id:$line})-[:SERVES {order:1}]->(s:Stop)
             RETURN s.lat AS lat, s.lon AS lon LIMIT 1
@@ -557,7 +556,6 @@ func (r *NeoRepo) AssignNearestIdleVehicle(ctx context.Context, lineId string) (
 		lat := rs.Record().Values[0].(float64)
 		lon := rs.Record().Values[1].(float64)
 
-		// find nearest IDLE vehicle
 		rs2, err := tx.Run(ctx, `
             MATCH (v:Vehicle {status:'IDLE'})
 			WHERE v.last_known_lat IS NOT NULL AND v.last_known_lon IS NOT NULL
@@ -597,7 +595,7 @@ func (r *NeoRepo) AssignNearestIdleVehicle(ctx context.Context, lineId string) (
 }
 
 /*
-2. Recalibrate NEXT: conditional update on relationship (complex CRUD)
+2. Recalibrate NEXT
 */
 func (r *NeoRepo) RecalibrateNext(ctx context.Context, from, to string, observed int32) (map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -622,7 +620,7 @@ func (r *NeoRepo) RecalibrateNext(ctx context.Context, from, to string, observed
 				"when": rec.Values[2].(int64),
 			}, nil
 		}
-		// if no update happened, return current value
+
 		rs2, err := tx.Run(ctx, `MATCH (a:Stop {id:$from})-[r:NEXT]->(b:Stop {id:$to}) RETURN r.travel_time AS cur`, map[string]any{"from": from, "to": to})
 		if err != nil {
 			return nil, err
@@ -638,7 +636,7 @@ func (r *NeoRepo) RecalibrateNext(ctx context.Context, from, to string, observed
 	return out.(map[string]any), nil
 }
 
-/* 3) TopPairs analytic (MATCH, WHERE, WITH, aggregate COUNT) */
+/* 3) TopPairs analytic */
 func (r *NeoRepo) TopPairs(ctx context.Context, limit int) ([]map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)
@@ -672,7 +670,7 @@ func (r *NeoRepo) TopPairs(ctx context.Context, limit int) ([]map[string]any, er
 	return out.([]map[string]any), nil
 }
 
-/* 4) DepotsIdleStats analytic (MATCH, WHERE, WITH, aggregate COUNT + AVG) */
+/* 4) DepotsIdleStats analytic */
 func (r *NeoRepo) DepotsIdleStats(ctx context.Context, limit int) ([]map[string]any, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)
@@ -691,7 +689,7 @@ func (r *NeoRepo) DepotsIdleStats(ctx context.Context, limit int) ([]map[string]
 		var res []map[string]any
 		for rs.Next(ctx) {
 			rec := rs.Record()
-			// parked_count may be int64, avg_idle_ms float64
+
 			res = append(res, map[string]any{
 				"depot_id":     rec.Values[0].(string),
 				"depot_name":   rec.Values[1].(string),
@@ -707,7 +705,7 @@ func (r *NeoRepo) DepotsIdleStats(ctx context.Context, limit int) ([]map[string]
 	return out.([]map[string]any), nil
 }
 
-/* 5) ShortestPath utility (used by server) */
+/* 5) ShortestPath utility */
 func (r *NeoRepo) ShortestPath(ctx context.Context, start, end string, maxHops int) ([]string, int, error) {
 	session := r.drv.NewSession(ctx, neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close(ctx)

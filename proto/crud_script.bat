@@ -1,6 +1,6 @@
 @echo off
 
-set HOST=localhost:50051
+set HOST=localhost:50052
 set G="grpcurl.exe"
 echo =====================================================
 echo Starting demo of all CRUD operations and complex RPCs
